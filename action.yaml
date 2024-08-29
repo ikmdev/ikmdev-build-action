@@ -64,6 +64,11 @@ runs:
                 "password": "${{ inputs.nexus_password }}"
               },
               {
+                "id": "${{ inputs.nexus_release_repo_id }}",
+                "username": "${{ inputs.nexus_username }}",
+                "password": "${{ inputs.nexus_password }}"
+              },
+              {
                 "id": "${{ inputs.nexus_mirror_id }}",
                 "username": "${{ inputs.nexus_username  }}",
                 "password": "${{ inputs.nexus_password }}"
