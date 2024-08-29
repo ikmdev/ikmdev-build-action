@@ -33,7 +33,7 @@ inputs:
   maven_settings:
     description: "Maven Settings File For Nexus" 
     required: false 
-    default: "/home/ec2-user/actions-runner/_work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml"
+    default: "/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml"
 
 
 
