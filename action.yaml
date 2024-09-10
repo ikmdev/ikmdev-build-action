@@ -31,7 +31,7 @@ runs:
         servers: '[{"id": "nexus", "username": "admin", "password": "${{inputs.nexus_repo_password}}"}]'
         profiles: '[{"id": "inject-application-properties", "properties": {"altDeploymentRepository": "nexus::https://nexus.tinkarbuild.com/repository/maven-snapshots"}}]'
         active_profiles: '["inject-application-properties"]' 
-        mirrors: '[{"id": "titan-maven-public", "name": "titan-maven-public", "url": "https://nexus.tinkarbuild.com/repository/maven-public", "mirrorOf": "*" }]'
+        mirrors: '[{"id": "maven-public", "name": "maven-public", "url": "https://nexus.tinkarbuild.com/repository/maven-public", "mirrorOf": "*" }]'
         output_file: .m2/settings.xml
 
     - name: Maven Build
