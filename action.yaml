@@ -7,8 +7,8 @@ inputs:
     description: "Current Branch"
     required: true
     default: "main"
-  maven_settings:
-    description: "Contains Maven Settings"
+  nexus_repo_password:
+    description: "Contains Nexus Repository Password"
     required: true
 
 
@@ -25,13 +25,21 @@ runs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-maven-
 
+    - name: Maven Settings File
+      uses: whelk-io/maven-settings-xml-action@v22
+      with:
+        servers: '[{"id": "nexus", "username": "admin", "password": "${{inputs.nexus_repo_password}}"}]'
+        profiles: '[{"id": "inject-application-properties", "properties": {"altDeploymentRepository": "nexus::https://nexus.tinkarbuild.com/repository/maven-snapshots"}}]'
+        active_profiles: '["inject-application-properties"]' 
+        output_file: .m2/settings.xml
+
     - name: Maven Build
       if: inputs.branch_name == 'main' || inputs.branch_name == 'master'
       shell: bash
       run: |
           ./mvnw clean install -U \
             --batch-mode \
-            -s ${{inputs.maven_settings}} \
+            -s '/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
             -e \
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
             -PcodeQuality
@@ -42,7 +50,7 @@ runs:
       run: |
           ./mvnw clean install -U \
             --batch-mode \
-            -s ${{inputs.maven_settings}} \
+            -s '/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
             -e \
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
             -Denforcer.skip=true \
