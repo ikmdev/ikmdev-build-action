@@ -7,35 +7,6 @@ inputs:
     description: "Current Branch"
     required: true
     default: "main"
-  nexus_snapshot_repo_id:
-    description: "Nexus Snapshot repo ID"
-    required: false
-    default: "titan-maven-snapshots"
-  nexus_release_repo_id:
-    description: "Nexus Release Repo ID"
-    required: false
-    default: "titan-maven-releases"
-  nexus_username:
-    description: "Nexus Username"
-    required: false
-    default: "admin"
-  nexus_password:
-    description: "Nexus Password" 
-    required: true
-  nexus_url:
-    description: "Nexus Url"
-    required: false
-    default: "https://nexus.tinkarbuild.com"
-  nexus_mirror_id:
-    description: "Nexus Mirror ID" 
-    required: false
-    default: "titan-maven-public"
-  maven_settings:
-    description: "Maven Settings File For Nexus" 
-    required: false 
-    default: "/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml"
-
-
 
 runs:
   using: "composite" 
@@ -46,80 +17,28 @@ runs:
     - name: Cache Maven packages
       uses: actions/cache@v3
       with:
-        path: ~/.m2
+        path: ~/.m2/repository
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
-
-    - name: Maven Settings File
-      uses: whelk-io/maven-settings-xml-action@v22
-      with:
-        servers: > 
-            [
-              {
-                "id": "nexus"
-              },
-              {
-                "id": "${{ inputs.nexus_snapshot_repo_id }}",
-                "username": "${{ inputs.nexus_username }}",
-                "password": "${{ inputs.nexus_password }}"
-              },
-              {
-                "id": "${{ inputs.nexus_release_repo_id }}",
-                "username": "${{ inputs.nexus_username }}",
-                "password": "${{ inputs.nexus_password }}"
-              },
-              {
-                "id": "${{ inputs.nexus_mirror_id }}",
-                "username": "${{ inputs.nexus_username  }}",
-                "password": "${{ inputs.nexus_password }}"
-              }
-            ] 
-        profiles: >
-            [{
-                "id": "inject-application-properties",
-                "properties": {
-                    "altSnapshotDeploymentRepository": "${{ inputs.nexus_snapshot_repo_id }}::${{ inputs.nexus_url }}/repository/maven-snapshots",
-                    "altReleaseDeploymentRepository": "${{ inputs.nexus_release_repo_id }}::${{ inputs.nexus_url }}/repository/maven-releases"
-                }
-            }]
-        active_profiles: > 
-            [
-              "inject-application-properties"
-            ]
-        mirrors: >
-            [{
-                "id": "${{ inputs.nexus_mirror_id }}",
-                "name": "${{ inputs.nexus_mirror_id }}",
-                "url": "${{ inputs.nexus_url }}/repository/maven-public",
-                "mirrorOf": "*"
-            }]
-        output_file: .m2/settings.xml
-
+        restore-keys: ${{ runner.os }}-maven-
 
     - name: Maven Build
-      if: inputs.branch_name == 'main' || inputs.branch_name == 'master'
+      if: github.event.repository.name != 'reasoner-test-data' && (inputs.branch_name == 'main' || inputs.branch_name == 'master')
       shell: bash
       run: |
           ./mvnw clean install -U \
-            -s ${{ inputs.maven_settings }} \
             --batch-mode \
             -e \
-            -Dmaven.build.cache.enabled=false \
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
-            -DrepositoryId='maven-snapshots' \
             -PcodeQuality
 
     - name: Maven Build -- Feature Branch
-      if: inputs.branch_name != 'main' && inputs.branch_name != 'master'
+      if: github.event.repository.name == 'reasoner-test-data' || (inputs.branch_name != 'main' && inputs.branch_name != 'master')
       shell: bash
       run: |
           ./mvnw clean install -U \
-            -s ${{ inputs.maven_settings }} \
             --batch-mode \
             -e \
-            -Dmaven.build.cache.enabled=false \
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
             -Denforcer.skip=true \
-            -DrepositoryId='maven-snapshots' \
             -PcodeQuality
 
