@@ -25,6 +25,7 @@ runs:
       if: github.event.repository.name != 'reasoner-test-data' && (inputs.branch_name == 'main' || inputs.branch_name == 'master')
       shell: bash
       run: |
+          echo ${{github.event.repository.name}};
           ./mvnw clean install -U \
             --batch-mode \
             -e \
