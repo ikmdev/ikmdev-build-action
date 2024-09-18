@@ -29,18 +29,18 @@ runs:
       uses: whelk-io/maven-settings-xml-action@v22
       with:
         servers: '[{"id": "nexus", "username": "admin", "password": "${{inputs.nexus_repo_password}}"}]'
-        profiles: '[{"id": "inject-application-properties", "properties": {"altDeploymentRepository": "nexus::https://nexus.tinkarbuild.com/repository/maven-snapshots"}}]'
+        profiles: '[{"id": "inject-application-properties", "properties": {"altDeploymentRepository": "nexus::http://172.20.33.175:8081/repository/maven-snapshots"}}]'
         active_profiles: '["inject-application-properties"]' 
-        mirrors: '[{"id": "nexus", "name": "nexus", "url": "https://nexus.tinkarbuild.com/repository/maven-public", "mirrorOf": "*" }]'
+        mirrors: '[{"id": "nexus", "name": "nexus", "url": "http://172.20.33.175:8081/repository/maven-public", "mirrorOf": "*" }]'
         output_file: .m2/settings.xml
 
     - name: Maven Build
       if: inputs.branch_name == 'main' || inputs.branch_name == 'master'
       shell: bash
       run: |
-          ./mvnw clean install -U \
+          mvn clean install -U \
             --batch-mode \
-            -s '/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
+            -s '/home/ec2-user/actions-runner/_work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
             -e \
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
             -PcodeQuality
@@ -49,9 +49,9 @@ runs:
       if: inputs.branch_name != 'main' && inputs.branch_name != 'master'
       shell: bash
       run: |
-          ./mvnw clean install -U \
+          mvn clean install -U \
             --batch-mode \
-            -s '/home/runner/work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
+            -s '/home/ec2-user/actions-runner/_work/${{github.event.repository.name}}/${{github.event.repository.name}}/.m2/settings.xml' \
             -e \
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
             -Denforcer.skip=true \
