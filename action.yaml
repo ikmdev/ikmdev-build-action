@@ -55,7 +55,7 @@ runs:
             -Dmaven.build.cache.enabled=false \
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
             -PcodeQuality \
-            -PgenerateData \
+            -P?generateData \
             ${{ inputs.mvn_additional_args }}
       working-directory: ${{inputs.working_directory}}
 
@@ -69,7 +69,7 @@ runs:
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
             -Denforcer.skip=true \
             -PcodeQuality \
-            -PgenerateData \
+            -P?generateData \
             ${{ inputs.mvn_additional_args }}
       working-directory: ${{inputs.working_directory}}
   
